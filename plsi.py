@@ -240,21 +240,21 @@ if __name__ == "__main__":
     )
     corpus = Corpus(args.filename, dictionary)
 
-    #train(
-    #    corpus,
-    #    num_z=3,
-    #    loop_count=10,
-    #    logger=logger
-    #)
+    train(
+        corpus,
+        num_z=3,
+        loop_count=10,
+        logger=logger
+    )
 
-    plsi = PLSI(corpus, dictionary)
-    plsi.load("model")
+    #plsi = PLSI(corpus, dictionary)
+    #plsi.load("model")
 
-    for (d, line), words in zip(
-            enumerate(corpus),
-            (line.strip().split() for line in open(args.filename))):
-        res = []
-        for w, word in zip(line, words):
-            i = plsi.dw2z(d, w)
-            res.append("{}:{}".format(word, i))
-        print(' '.join(res))
+    #for (d, line), words in zip(
+    #        enumerate(corpus),
+    #        (line.strip().split() for line in open(args.filename))):
+    #    res = []
+    #    for w, word in zip(line, words):
+    #        i = plsi.dw2z(d, w)
+    #        res.append("{}:{}".format(word, i))
+    #    print(' '.join(res))
