@@ -2,43 +2,67 @@
 PLSI library
 ==============================
 
-Require numpy.
+必要なもの
+===========
 
-Training
-=========
+*   numpy
 
-Train first:
+実行している環境では `numpy (1.10.0.dev-b69035e)` を使っている。
+
+モデル学習
+============
+
+まずはモデルを学習します。
 
 .. code-block:: bash
 
-    $ python plsi.py test.txt >model
+    $ python train_plsi.py test.txt -n 10 >model
+    2015-02-04 05:00:59,605 - __main__ - INFO - num_d: 4, num_w: 5, num_z: 3, num_data: 13
+
+オプションの意味は
+
+.. code-block:: bash
+
+    $ python train_plsi.py -h
+    usage: train_plsi.py [-h] [-n [NUMZ]] [-v] filename
+
+    positional arguments:
+      filename              filename
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -n [NUMZ], --numz [NUMZ]
+                            the number of topics
+      -v, --verbose         show DEBUG log
 
 
-Example
-========
+トピックを求める
+==================
 
-.. code-block:: python
+test.txt の各単語のトピックは `plsi.py` を使って求めることができます。
 
-    >>> import plsi
+.. code-block:: bash
 
-    >>> filename = "test.txt"
+    $ python plsi.py model test.txt
+    2015-02-04 05:02:07,034 - plsi.py - INFO - load model: num_d 4, num_w 5, num_z 3
+    a:0 b:0 c:0
+    a:1 b:1 d:1
+    a:1 b:1 d:1
+    a:2 c:2 d:2 e:2
 
-    >>> dictionary = plsi.file2dic(
-    >>>     line.strip().split() for line in open(filename)
-    >>> )
-    >>> corpus = plsi.Corpus(filename, dictionary)
-    >>> plsi = PLSI(corpus, dictionary)
-    >>> plsi.load("model")
-    2015-01-27 22:12:36,954 - plsi.py - INFO - load model: num_d 4, num_w 5, num_z 3
-    >>> for (d, line), words in zip(
-    >>>         enumerate(corpus),
-    >>>         (line.strip().split() for line in open(filename))):
-    >>>     res = []
-    >>>     for w, word in zip(line, words):
-    >>>         i = plsi.dw2z(d, w)
-    >>>         res.append("{}:{}".format(word, i))
-    >>>     print(' '.join(res))
-    a:2 b:2 c:0
-    a:2 b:2 d:1
-    a:2 b:2 d:1
-    a:1 c:0 d:1 e:1
+オプションの意味は
+
+.. code-block:: bash
+
+    python plsi.py -h
+    usage: plsi.py [-h] [-v] model filename
+
+    positional arguments:
+      model          model file
+      filename       filename
+
+    optional arguments:
+      -h, --help     show this help message and exit
+      -v, --verbose  show DEBUG log
+
+です。必ず `model` と `filename` を指定してください。

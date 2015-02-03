@@ -1,6 +1,3 @@
-build/
 __pycache__/
-*.so
-*.c
-plsi_pure.py
 test.txt
+model

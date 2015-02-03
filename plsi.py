@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 # coding:utf-8
 
-from collections import defaultdict
 import numpy as np
 from logging import getLogger
 
@@ -29,7 +28,7 @@ def mkdictionary(xs: [[str]]) -> {str: int}:
 
 def file2dic(filename):
     return mkdictionary(
-        line.strip().split() for line in open(args.filename)
+        line.strip().split() for line in open(filename)
     )
 
 
@@ -120,6 +119,7 @@ class PLSI:
     def d2z(self, d):
         return np.argmax(self.d2vec(d))
 
+
 def train(
     corpus,
     num_z: int,
@@ -184,7 +184,8 @@ def train(
                     p_z[z] * p_d_z[d][z] * p_w_z[w][z] for z in range(num_z)
                 )
                 for z in range(num_z):
-                    p_z_dw[z][d][w] = p_z[z] * p_d_z[d][z] * p_w_z[w][z] / denom
+                    p_z_dw[z][d][w] = p_z[z] * p_d_z[d][z] * p_w_z[w][z] / \
+                        denom
 
     logger.debug("sum of P(z): {}".format(p_z.sum()))
     logger.debug("sum of P(w|z)\n{}".format(p_w_z.T.sum(1)))
@@ -205,26 +206,29 @@ def train(
             print("{} {}	{:.6f}".format(d, z, p_d_z[d][z]))
 
 
-
 if __name__ == "__main__":
     import sys
     filename = sys.argv[1]
 
-    from logging import getLogger, basicConfig, DEBUG, INFO
+    from logging import basicConfig, DEBUG, INFO
     import argparse
 
     # parse arg
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "model",
+        type=str,
+        help="model file"
+    )
+    parser.add_argument(
         "filename",
-        nargs="?",
         type=str,
         help="filename"
     )
     parser.add_argument(
         "-v", "--verbose",
         action="store_true",
-        help="verbosity option"
+        help="show DEBUG log"
     )
     args = parser.parse_args()
 
@@ -235,26 +239,18 @@ if __name__ == "__main__":
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     )
 
-    dictionary = file2dic(
-        line.strip().split() for line in open(args.filename)
-    )
+    dictionary = file2dic(args.filename)
     corpus = Corpus(args.filename, dictionary)
 
-    train(
-        corpus,
-        num_z=3,
-        loop_count=10,
-        logger=logger
-    )
+    plsi = PLSI(corpus, dictionary)
+    plsi.load(args.model)
 
-    #plsi = PLSI(corpus, dictionary)
-    #plsi.load("model")
-
-    #for (d, line), words in zip(
-    #        enumerate(corpus),
-    #        (line.strip().split() for line in open(args.filename))):
-    #    res = []
-    #    for w, word in zip(line, words):
-    #        i = plsi.dw2z(d, w)
-    #        res.append("{}:{}".format(word, i))
-    #    print(' '.join(res))
+    for (d, line), words in zip(
+            enumerate(corpus),
+            (line.strip().split() for line in open(args.filename))
+    ):
+        res = []
+        for w, word in zip(line, words):
+            i = plsi.dw2z(d, w)
+            res.append("{}:{}".format(word, i))
+        print(' '.join(res))
